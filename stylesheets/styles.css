@@ -1010,3 +1010,9 @@ footer {
     width: auto;
   }
 }
+
+#products img {
+	max-height: 80px;
+	background-color: #fff; 
+	padding: 5px;
+}
