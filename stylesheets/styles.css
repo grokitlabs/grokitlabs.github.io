@@ -895,9 +895,10 @@ footer {
 
   section {
     border: 1px solid #e5e5e5;
-    border-width: 1px 0;
+    border-width: 1px;
     padding: 20px auto;
     margin: 190px auto 20px;
+	margin-top: 170px;
     max-width: 600px;
   }
 
@@ -943,7 +944,7 @@ footer {
   }
 
   section {
-    margin-top: 130px;
+    margin-top: 150px;
     margin-bottom: 0px;
     width: auto;
   }
