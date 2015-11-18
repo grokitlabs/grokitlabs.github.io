@@ -799,7 +799,7 @@ section {
   margin: 20px 0;
   margin-top: 170px;
   position: relative;
-  background: #fbfbfb;
+  background: rgba(113, 113, 113, 0.14);
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   -o-border-radius: 3px;
@@ -862,6 +862,57 @@ footer {
   line-height: 16px;
 }
 
+/* Grokit custom style */
+#products {
+	padding-left: 0;
+}
+
+#products img {
+	max-height: 80px;
+	background-color: #fff; 
+	padding: 5px;
+}
+
+#products li {
+  list-style: none; 
+  background: #fff; 
+  padding: 5px; 
+  margin: 10px;	
+}
+
+#grok-list {
+	font-style: italic; 
+	font-size: 1.2em;
+}
+
+#grok-intro {
+	padding-top: 10px; 
+	font-size: 1.2em;
+}
+
+#footer-contact {
+	text-align: center; 
+	border-top: 1px dotted #404040; 
+	padding-top: 15px;
+}
+
+#footer-contact a {
+	font-size: 2.0em;
+	margin: 10px;
+}
+
+#copyright {
+	margin-top: 15px;
+	font-size: .8em; 
+}
+
+#logo {
+	background: #ffffff; 
+	padding: 10px; 
+	width: 450px;
+}
+
+/* responsive media queries */
 @media print, screen and (max-width: 1060px) {
   div.wrapper {
     width: auto;
@@ -882,7 +933,7 @@ footer {
     -o-text-overflow: ellipsis;
     -ms-text-overflow: ellipsis;
   }
-
+	
   #banner {
     width: 100%;
   }
@@ -932,6 +983,10 @@ footer {
     display: none;
   }
 
+  #logo {
+	  width: 350px;
+  }
+
   #banner {
     top: 80px;
   }
@@ -959,6 +1014,11 @@ footer {
     padding: 5px 0px;
     min-height: 0px;
   }
+
+  #logo {
+	  width: 250px;
+  }
+  
   header h1 {
     font-size: 24px;
     white-space: nowrap;
@@ -1012,45 +1072,3 @@ footer {
   }
 }
 
-#products {
-	padding-left: 0;
-}
-
-#products img {
-	max-height: 80px;
-	background-color: #fff; 
-	padding: 5px;
-}
-
-#products li {
-  list-style: none; 
-  background: #fff; 
-  padding: 5px; 
-  margin: 10px;	
-}
-
-#grok-list {
-	font-style: italic; 
-	font-size: 1.2em;
-}
-
-#grok-intro {
-	padding-top: 10px; 
-	font-size: 1.2em;
-}
-
-#footer-contact {
-	text-align: center; 
-	border-top: 1px dotted #404040; 
-	padding-top: 15px;
-}
-
-#footer-contact a {
-	font-size: 2.0em;
-	margin: 10px;
-}
-
-#copyright {
-	margin-top: 15px;
-	font-size: .8em; 
-}
