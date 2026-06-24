@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ES Plan — 2026-06-24</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e8eaf0;font-size:13px}
+.page{display:flex;flex-direction:column;height:100vh}
+.topbar{display:flex;align-items:center;gap:16px;padding:10px 16px;background:#1a1d26;border-bottom:1px solid #2a2d3a;flex-shrink:0;flex-wrap:wrap}
+.topbar-date{font-size:11px;color:#9098b0;text-transform:uppercase;letter-spacing:.05em}
+.topbar-price{font-size:24px;font-weight:700;color:#fbbf24;line-height:1.1}
+.topbar-meta{font-size:11px;color:#9098b0}
+.bias-pill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;color:#f87171;background:rgba(255,255,255,0.08);text-transform:uppercase;letter-spacing:.06em}
+.main{display:flex;flex:1;min-height:0}
+.chart-col{flex:1;min-width:0;display:flex;flex-direction:column}
+canvas{flex:1;min-height:0}
+.legend{display:flex;flex-wrap:wrap;gap:5px 12px;padding:7px 14px;border-top:1px solid #2a2d3a;font-size:10px;flex-shrink:0;background:#0f1117}
+.li{display:flex;align-items:center;gap:5px;color:#9098b0}
+.lb{width:14px;height:10px;border-radius:2px;opacity:.6}
+.right-panel{width:310px;background:#13161f;border-left:1px solid #2a2d3a;display:flex;flex-direction:column;overflow:hidden}
+.panel-tabs{display:flex;border-bottom:1px solid #2a2d3a;flex-shrink:0}
+.tab{flex:1;padding:9px 4px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9098b0;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
+.tab.active{color:#e8eaf0;border-bottom-color:#60a5fa}
+.panel-body{flex:1;overflow-y:auto;padding:12px 14px}
+.panel-section{display:none}.panel-section.active{display:block}
+.setup-row{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.setup-row:last-child{border-bottom:none}
+.sh{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.badge{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:3px}
+.bl{background:rgba(52,211,153,.15);color:#34d399}
+.bs{background:rgba(248,113,113,.15);color:#f87171}
+.bg{background:rgba(251,191,36,.12);color:#fbbf24;margin-left:auto}
+.sn{font-size:11px;font-weight:600}
+.sd{font-size:10px;color:#9098b0;line-height:1.5;margin-bottom:4px}
+.tg{display:inline-block;margin:1px 3px 1px 0;padding:1px 5px;border-radius:2px;font-size:9px;font-weight:700}
+.tgl{background:rgba(52,211,153,.12);color:#34d399}
+.tgs{background:rgba(248,113,113,.12);color:#f87171}
+.ctx-row{display:grid;grid-template-columns:52px 1fr 1fr 1fr;gap:4px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px;align-items:center}
+.ctx-row:last-child{border-bottom:none}
+.ctx-label{color:#9098b0;font-size:9px}
+.ctx-val{font-weight:600;font-variant-numeric:tabular-nums;font-size:10px}
+.section-hdr{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9098b0;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #2a2d3a}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="topbar">
+  <div>
+    <div class="topbar-date">ES Futures &middot; 2026-06-24</div>
+    <div class="topbar-price">7451.50 <span class="topbar-meta" style="font-size:12px">last</span></div>
+  </div>
+  <div class="bias-pill">BEARISH BIAS</div>
+  <div class="topbar-meta">Pivot: <b style="color:#e8eaf0">7452.0</b></div>
+  <div class="topbar-meta" style="margin-left:auto;font-size:10px;color:#555">Generated 2026-06-24 09:11</div>
+</div>
+
+<div class="main">
+  <div class="chart-col">
+    <canvas id="chart"></canvas>
+    <div class="legend">
+      <div class="li"><div class="lb" style="background:linear-gradient(90deg,#ef4444,#f97316);opacity:.9"></div>Strong confluence (3+ sources)</div>
+      <div class="li"><div class="lb" style="background:#f59e0b;opacity:.7"></div>Medium (2 sources)</div>
+      <div class="li"><div class="lb" style="background:#9098b0;opacity:.35"></div>Single source reference</div>
+      <div class="li"><div class="lb" style="background:rgba(52,211,153,.25);border:1px solid rgba(52,211,153,.4)"></div>Long entry zone</div>
+      <div class="li"><div class="lb" style="background:rgba(248,113,113,.2);border:1px solid rgba(248,113,113,.4)"></div>Short entry zone</div>
+      <div class="li"><div class="lb" style="background:#fbbf24"></div>Current price</div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="panel-tabs">
+      <div class="tab active" onclick="switchTab('setups',this)">Setups</div>
+      <div class="tab" onclick="switchTab('zones',this)">Zones</div>
+      <div class="tab" onclick="switchTab('context',this)">Context</div>
+      <div class="tab" onclick="switchTab('thesis',this)">Thesis</div>
+    </div>
+    <div class="panel-body">
+      <div id="tab-setups" class="panel-section active">
+
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bl">LONG</span>
+            <span class="sn">① Failed Breakdown</span>
+            <span class="badge bg">A</span>
+          </div>
+          <div class="sd">Entry: 7427–7429 &nbsp;·&nbsp; Primary setup. FB of Jun12 low / excess low. Open dips < 7427-7429 then recovers. Highest …</div>
+          <div><span class="tg tgl">7452</span><span class="tg tgl">7472</span><span class="tg tgl">7491</span><span class="tg tgl">7530</span></div>
+        </div>
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bl">LONG</span>
+            <span class="sn">② Breakout</span>
+            <span class="badge bg">B</span>
+          </div>
+          <div class="sd">Entry: 7452–7455 &nbsp;·&nbsp; Hold and accept above 7452 pivot on the open. If open holds 7452, go with it targeting UT1…</div>
+          <div><span class="tg tgl">7472</span><span class="tg tgl">7491</span><span class="tg tgl">7510</span></div>
+        </div>
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bl">LONG</span>
+            <span class="sn">③ Trap Recovery</span>
+            <span class="badge bg">B</span>
+          </div>
+          <div class="sd">Entry: 7449–7452 &nbsp;·&nbsp; Trap below 7452 with recovery. Any quick dip under 7452 that reverses back above = long tr…</div>
+          <div><span class="tg tgl">7472</span><span class="tg tgl">7491</span></div>
+        </div>
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bl">LONG</span>
+            <span class="sn">④ Strength Add</span>
+            <span class="badge bg">C</span>
+          </div>
+          <div class="sd">Entry: 7472–7475 &nbsp;·&nbsp; Add-on only after T1 cleared. Reclaim of 7472 (UT1/VAH) opens 7491 → backtest 7530. Do not…</div>
+          <div><span class="tg tgl">7491</span><span class="tg tgl">7530</span></div>
+        </div>
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bs">SHORT</span>
+            <span class="sn">⑤ Backtest Rejection</span>
+            <span class="badge bg">B</span>
+          </div>
+          <div class="sd">Entry: 7525–7535 &nbsp;·&nbsp; Fade the recovery if 7530 backtest is rejected. "The obvious short here is the backtest of…</div>
+          <div><span class="tg tgs">7472</span><span class="tg tgs">7452</span><span class="tg tgs">7429</span></div>
+        </div>
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bs">SHORT</span>
+            <span class="sn">⑥ Level Break</span>
+            <span class="badge bg">B</span>
+          </div>
+          <div class="sd">Entry: 7449–7452 &nbsp;·&nbsp; Smashelito two-way plan: hold below 7452 opens 7429 (DT1) → 7405 → 7380 (FDT). Short the p…</div>
+          <div><span class="tg tgs">7429</span><span class="tg tgs">7405</span><span class="tg tgs">7380</span></div>
+        </div>
+        <div class="setup-row">
+          <div class="sh">
+            <span class="badge bs">SHORT</span>
+            <span class="sn">⑦ Breakdown</span>
+            <span class="badge bg">C</span>
+          </div>
+          <div class="sd">Entry: 7396–7399 &nbsp;·&nbsp; Mancini bear trigger — bears only in full control below 7399. Low win-rate breakdown trade…</div>
+          <div><span class="tg tgs">7380</span><span class="tg tgs">7350</span></div>
+        </div>
+      </div>
+      <div id="tab-zones" class="panel-section">
+        <div class="section-hdr">Confluence Zones (by strength)</div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7427–7436</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">5 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:100%;background:#ef4444;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">prior_hl + val + mancini + smashelito + fib_daily</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7530–7540</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">4 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:100%;background:#ef4444;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">vah + val + mancini + poc</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7399–7405</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">3 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:77%;background:#ef4444;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">smashelito + mancini + prior_hl</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7452–7456</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">3 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:77%;background:#ef4444;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">fib_hourly + smashelito + mancini</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7464–7472</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">3 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:66%;background:#ef4444;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">fib_hourly + vah + smashelito</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7565–7570</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">3 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:66%;background:#ef4444;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">vah + val + poc</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7380–7385</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">2 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:55%;background:#f59e0b;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">smashelito + fib_daily</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7550–7555</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">3 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:55%;background:#f59e0b;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">val + vah + prior_hl</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7510–7514</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">3 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:44%;background:#f59e0b;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">smashelito + prior_hl</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7440–7447</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">2 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:33%;background:#60a5fa;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">fib_hourly + poc</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7491</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">1 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:33%;background:#60a5fa;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">smashelito</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7355</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">1 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:22%;background:#60a5fa;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">val</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7479</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">1 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:22%;background:#60a5fa;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">fib_daily</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7630</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">1 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:22%;background:#60a5fa;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">poc</div>
+        </div>
+        <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:11px;font-weight:700;color:#e8eaf0">7645</span>
+            <span style="font-size:9px;color:#9098b0;margin-left:auto">1 inputs</span>
+          </div>
+          <div style="height:4px;background:#1e2130;border-radius:2px;margin-bottom:5px">
+            <div style="height:4px;width:22%;background:#60a5fa;border-radius:2px"></div>
+          </div>
+          <div style="font-size:10px;color:#9098b0">vah</div>
+        </div>
+      </div>
+      <div id="tab-context" class="panel-section">
+        <div class="section-hdr">Prior 7 Sessions</div>
+        <div class="ctx-row" style="font-size:9px;color:#555;padding-bottom:2px">
+          <span>Date</span><span>H / L</span><span>POC</span><span>VA</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-23</span>
+          <span class="ctx-val" style="color:#9098b0">7550/7415</span>
+          <span class="ctx-val" style="color:#f59e0b">7440</span>
+          <span class="ctx-val" style="color:#a78bfa">7430–7465</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-22</span>
+          <span class="ctx-val" style="color:#9098b0">7599/7513</span>
+          <span class="ctx-val" style="color:#f59e0b">7540</span>
+          <span class="ctx-val" style="color:#a78bfa">7535–7555</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-18</span>
+          <span class="ctx-val" style="color:#9098b0">7514/7436</span>
+          <span class="ctx-val" style="color:#f59e0b">7565</span>
+          <span class="ctx-val" style="color:#a78bfa">7550–7570</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-17</span>
+          <span class="ctx-val" style="color:#9098b0">7544/7405</span>
+          <span class="ctx-val" style="color:#f59e0b">7590</span>
+          <span class="ctx-val" style="color:#a78bfa">7540–7605</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-16</span>
+          <span class="ctx-val" style="color:#9098b0">7570/7510</span>
+          <span class="ctx-val" style="color:#f59e0b">7610</span>
+          <span class="ctx-val" style="color:#a78bfa">7605–7630</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-15</span>
+          <span class="ctx-val" style="color:#9098b0">7584/7480</span>
+          <span class="ctx-val" style="color:#f59e0b">7630</span>
+          <span class="ctx-val" style="color:#a78bfa">7615–7645</span>
+        </div>
+        <div class="ctx-row">
+          <span class="ctx-label">06-12</span>
+          <span class="ctx-val" style="color:#9098b0">7462/7366</span>
+          <span class="ctx-val" style="color:#f59e0b">7435</span>
+          <span class="ctx-val" style="color:#a78bfa">7405–7440</span>
+        </div><div class="section-hdr">Prior 4 Weeks</div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">06-15–06-18</span>
+          <span class="ctx-val" style="color:#9098b0">7584/7405</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 7630</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">06-08–06-12</span>
+          <span class="ctx-val" style="color:#9098b0">7491/7232</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 7435</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">06-01–06-05</span>
+          <span class="ctx-val" style="color:#9098b0">7632/7359</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 7625</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">05-26–05-29</span>
+          <span class="ctx-val" style="color:#9098b0">7612/7506</span>
+          <span class="ctx-val" style="color:#f59e0b">POC —</span>
+        </div><div class="section-hdr">Prior 6 Months</div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">2026-05</span>
+          <span class="ctx-val" style="color:#9098b0">7612/7200</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 7440</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">2026-04</span>
+          <span class="ctx-val" style="color:#9098b0">7254/6504</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 7160</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">2026-03</span>
+          <span class="ctx-val" style="color:#9098b0">6911/6353</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 6640</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">2026-02</span>
+          <span class="ctx-val" style="color:#9098b0">7027/6752</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 6885</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">2026-01</span>
+          <span class="ctx-val" style="color:#9098b0">7043/6814</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 6985</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px">
+          <span style="color:#9098b0">2025-12</span>
+          <span class="ctx-val" style="color:#9098b0">6994/6890</span>
+          <span class="ctx-val" style="color:#f59e0b">POC 6950</span>
+        </div>
+      </div>
+      <div id="tab-thesis" class="panel-section">
+        <div class="section-hdr">Bull Thesis</div>
+        <p style="font-size:11px;line-height:1.65;color:#9098b0;margin-bottom:14px">Both newsletters agree: yesterday broke the multi-day 7530 range support elevator-down to 7416, then recovered 7427 (Failed Breakdown). Now ES needs to backtest 7530 to confirm bulls. Bull path: hold 7452 pivot → recover 7472 (UT1/VAH) → push 7491 → backtest 7530. Primary long trigger: FB of any dip below 7427-7429 with recovery. 7472 reclaims and 7452 trap-recoveries are Mancini&#39;s add-on spots.</p>
+        <div class="section-hdr">Bear Thesis</div>
+        <p style="font-size:11px;line-height:1.65;color:#9098b0;margin-bottom:14px">Smashelito: break and hold below 7452 opens 7429 (DT1) → 7405 → 7380 (FDT). Mancini: bears only take control below 7399 (then 7380). VIX confirmation: weakness above 20.46, strength below 18.52 (Smashelito). Key risk: unchanged or lower value = bearish development per Smashelito.</p>
+        <div class="section-hdr">Notes</div>
+        <p style="font-size:11px;line-height:1.65;color:#9098b0">Pre-market 7455 — sitting right on Smashelito&#39;s 7452 pivot going into RTH. ES down ~100 pts from prior close. Both newsletters cautious — Smashelito explicitly defensive given gap below FDT. Mancini&#39;s lean: backtest 7530 is the bull objective. VIX levels are elevated (>20) which Smashelito flags as confirming weakness.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const CZONES    = [{"lo": 7355.0, "hi": 7355.0, "center": 7355.0, "weight": 2, "sources": ["val"], "categories": ["volume"], "direction": null, "label": "7355 \u00b7 VAL", "member_count": 1}, {"lo": 7380, "hi": 7385.05, "center": 7382.525, "weight": 5, "sources": ["smashelito", "fib_daily"], "categories": ["newsletter", "fibonacci"], "direction": null, "label": "7382.5 \u00b7 Smash + D-Fib", "member_count": 2}, {"lo": 7399, "hi": 7405, "center": 7402.0, "weight": 7, "sources": ["smashelito", "mancini", "prior_hl"], "categories": ["newsletter", "structure"], "direction": null, "label": "7402.0 \u00b7 Smash + Mancini + PrevHL", "member_count": 3}, {"lo": 7415.25, "hi": 7415.25, "center": 7415.25, "weight": 1, "sources": ["prior_hl"], "categories": ["structure"], "direction": null, "label": "7415 \u00b7 PrevHL", "member_count": 1}, {"lo": 7427, "hi": 7436.25, "center": 7431.625, "weight": 11, "sources": ["prior_hl", "val", "mancini", "smashelito", "fib_daily"], "categories": ["newsletter", "fibonacci", "volume", "structure"], "direction": null, "label": "7431.6 \u00b7 Smash + Mancini + VAL + D-Fib + PrevHL", "member_count": 5}, {"lo": 7440.0, "hi": 7447.28, "center": 7443.639999999999, "weight": 3, "sources": ["fib_hourly", "poc"], "categories": ["fibonacci", "volume"], "direction": null, "label": "7443.6 \u00b7 POC + H-Fib", "member_count": 2}, {"lo": 7452, "hi": 7455.62, "center": 7453.8099999999995, "weight": 7, "sources": ["fib_hourly", "smashelito", "mancini"], "categories": ["newsletter", "fibonacci"], "direction": "pivot", "label": "7453.8 \u00b7 Smash + Mancini + H-Fib", "member_count": 3}, {"lo": 7463.97, "hi": 7472, "center": 7467.985000000001, "weight": 6, "sources": ["fib_hourly", "vah", "smashelito"], "categories": ["newsletter", "fibonacci", "volume"], "direction": null, "label": "7468.0 \u00b7 Smash + VAH + H-Fib", "member_count": 3}, {"lo": 7479.45, "hi": 7479.45, "center": 7479.45, "weight": 2, "sources": ["fib_daily"], "categories": ["fibonacci"], "direction": null, "label": "7479 \u00b7 D-Fib", "member_count": 1}, {"lo": 7491, "hi": 7491, "center": 7491, "weight": 3, "sources": ["smashelito"], "categories": ["newsletter"], "direction": null, "label": "7491 \u00b7 Smash", "member_count": 1}, {"lo": 7510, "hi": 7514.5, "center": 7512.25, "weight": 4, "sources": ["smashelito", "prior_hl"], "categories": ["newsletter", "structure"], "direction": null, "label": "7512.2 \u00b7 Smash + PrevHL", "member_count": 3}, {"lo": 7530, "hi": 7540.0, "center": 7535.0, "weight": 9, "sources": ["vah", "val", "mancini", "poc"], "categories": ["newsletter", "volume"], "direction": null, "label": "7535.0 \u00b7 Mancini + POC + VAH + VAL", "member_count": 4}, {"lo": 7549.5, "hi": 7555.0, "center": 7552.25, "weight": 5, "sources": ["val", "vah", "prior_hl"], "categories": ["volume", "structure"], "direction": null, "label": "7552.2 \u00b7 VAH + VAL + PrevHL", "member_count": 3}, {"lo": 7565.0, "hi": 7570.0, "center": 7567.5, "weight": 6, "sources": ["vah", "val", "poc"], "categories": ["volume"], "direction": null, "label": "7567.5 \u00b7 POC + VAH + VAL", "member_count": 3}, {"lo": 7584.5, "hi": 7584.5, "center": 7584.5, "weight": 1, "sources": ["prior_hl"], "categories": ["structure"], "direction": null, "label": "7584 \u00b7 PrevHL", "member_count": 1}, {"lo": 7599.25, "hi": 7599.25, "center": 7599.25, "weight": 1, "sources": ["prior_hl"], "categories": ["structure"], "direction": null, "label": "7599 \u00b7 PrevHL", "member_count": 1}, {"lo": 7630.0, "hi": 7630.0, "center": 7630.0, "weight": 2, "sources": ["poc"], "categories": ["volume"], "direction": null, "label": "7630 \u00b7 POC", "member_count": 1}, {"lo": 7645.0, "hi": 7645.0, "center": 7645.0, "weight": 2, "sources": ["vah"], "categories": ["volume"], "direction": null, "label": "7645 \u00b7 VAH", "member_count": 1}];
+const SZONES    = [{"lo": 7427, "hi": 7429, "dir": "long", "type": "failed_breakdown", "grade": "A"}, {"lo": 7452, "hi": 7455, "dir": "long", "type": "breakout", "grade": "B"}, {"lo": 7449, "hi": 7452, "dir": "long", "type": "trap_recovery", "grade": "B"}, {"lo": 7472, "hi": 7475, "dir": "long", "type": "strength_add", "grade": "C"}, {"lo": 7525, "hi": 7535, "dir": "short", "type": "backtest_rejection", "grade": "B"}, {"lo": 7449, "hi": 7452, "dir": "short", "type": "level_break", "grade": "B"}, {"lo": 7396, "hi": 7399, "dir": "short", "type": "breakdown", "grade": "C"}];
+const CURRENT   = 7451.5;
+const PRICE_MIN = 7330.0;
+const PRICE_MAX = 7670.0;
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+const canvas = document.getElementById('chart');
+const ctx    = canvas.getContext('2d');
+
+// Zone thickness: scales with weight, min 3px, max 24px for a single line,
+// but for zones with spread (hi!=lo) it fills the real range.
+function zoneOpacity(w) {
+  // weight 1=0.18, 4=0.45, 7+=0.75
+  return Math.min(0.78, 0.14 + w * 0.09);
+}
+function zoneColor(z) {
+  const has_nl = z.sources.some(s => s==='smashelito'||s==='mancini'||s==='newsletter');
+  const has_vol = z.sources.some(s => s==='poc'||s==='vah'||s==='val');
+  const has_fib = z.sources.some(s => s==='fib_daily'||s==='fib_hourly');
+  if (z.weight >= 6) return '#ef4444';       // hot red — very strong
+  if (z.weight >= 4) return '#f97316';       // orange — strong
+  if (has_nl && has_vol) return '#f59e0b';   // amber — nl + volume agree
+  if (has_nl && has_fib) return '#a78bfa';   // purple — nl + fib agree
+  if (has_nl) return '#60a5fa';              // blue — newsletter only
+  if (has_vol) return '#f59e0b';             // amber — volume only
+  if (has_fib) return '#6ee7b7';             // mint — fib only
+  return '#9098b0';
+}
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  const el  = canvas.parentElement;
+  const W   = el.clientWidth;
+  const H   = el.clientHeight || 500;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  draw(W, H);
+}
+
+function py(price, H, pad) {
+  return pad.top + (PRICE_MAX - price) / (PRICE_MAX - PRICE_MIN) * (H - pad.top - pad.bottom);
+}
+
+const MIN_ZONE_PX = 4;  // minimum rendered zone height in px
+
+function draw(W, H) {
+  ctx.clearRect(0, 0, W, H);
+  const pad = {top:20, bottom:20, left:58, right:190};
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top  - pad.bottom;
+  const p      = price => py(price, H, pad);
+
+  // Background
+  ctx.fillStyle = '#0f1117'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#13161f'; ctx.fillRect(pad.left, pad.top, chartW, chartH);
+
+  // Horizontal grid
+  for (let pr = Math.ceil(PRICE_MIN/20)*20; pr <= PRICE_MAX; pr += 20) {
+    const y = p(pr);
+    ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+chartW,y); ctx.stroke();
+  }
+
+  // ── 1. Trade entry zones (faint shaded band, full width) ─────────────────
+  SZONES.forEach(z => {
+    if (z.hi < PRICE_MIN || z.lo > PRICE_MAX) return;
+    const y1 = p(Math.min(z.hi, PRICE_MAX));
+    const y2 = p(Math.max(z.lo, PRICE_MIN));
+    ctx.fillStyle = z.dir==='long'
+      ? 'rgba(52,211,153,0.06)'
+      : 'rgba(248,113,113,0.06)';
+    ctx.fillRect(pad.left, y1, chartW, Math.max(2, y2-y1));
+    // subtle left border
+    ctx.fillStyle = z.dir==='long' ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)';
+    ctx.fillRect(pad.left, y1, 2, Math.max(2, y2-y1));
+  });
+
+  // ── 2. Confluence zone boxes ──────────────────────────────────────────────
+  // Sorted weakest-first so stronger zones render on top
+  const sortedByWeight = [...CZONES].sort((a,b) => a.weight - b.weight);
+
+  sortedByWeight.forEach(z => {
+    if (z.center < PRICE_MIN || z.center > PRICE_MAX) return;
+    const color = zoneColor(z);
+    const alpha = zoneOpacity(z.weight);
+
+    const spread = z.hi - z.lo;
+    let y1, y2;
+    if (spread >= 1) {
+      y1 = p(Math.min(z.hi, PRICE_MAX));
+      y2 = p(Math.max(z.lo, PRICE_MIN));
+    } else {
+      // Single-price: give it minimum visible height centered on the price
+      const cy2 = p(z.center);
+      const halfH = Math.max(MIN_ZONE_PX, 2 + z.weight) / 2;
+      y1 = cy2 - halfH;
+      y2 = cy2 + halfH;
+    }
+    const boxH = Math.max(MIN_ZONE_PX, y2 - y1);
+
+    // Fill
+    ctx.fillStyle = hexToRgba(color, alpha * 0.35);
+    ctx.fillRect(pad.left, y1, chartW, boxH);
+
+    // Top + bottom border lines (stronger = thicker)
+    const lineW = z.weight >= 6 ? 1.5 : z.weight >= 4 ? 1 : 0.5;
+    ctx.strokeStyle = hexToRgba(color, alpha);
+    ctx.lineWidth   = lineW;
+    ctx.setLineDash([]);
+    if (spread >= 1) {
+      ctx.beginPath(); ctx.moveTo(pad.left, y1); ctx.lineTo(pad.left+chartW, y1); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad.left, y2); ctx.lineTo(pad.left+chartW, y2); ctx.stroke();
+    } else {
+      // single center line
+      const cy2 = (y1+y2)/2;
+      ctx.beginPath(); ctx.moveTo(pad.left, cy2); ctx.lineTo(pad.left+chartW, cy2); ctx.stroke();
+    }
+  });
+
+  // ── 3. Price-axis labels + right-side zone labels (de-overlapped) ─────────
+  const labelZones = [...CZONES]
+    .filter(z => z.weight >= 2 && z.center >= PRICE_MIN && z.center <= PRICE_MAX)
+    .sort((a,b) => b.center - a.center);
+
+  let lastLabelY = -Infinity;
+  labelZones.forEach(z => {
+    const y = p(z.center);
+    if (y - lastLabelY < 13) return;
+    lastLabelY = y;
+    const color = zoneColor(z);
+    // Left axis price
+    ctx.font='10px -apple-system,sans-serif'; ctx.textAlign='right';
+    ctx.fillStyle = hexToRgba(color, 0.8);
+    ctx.fillText(z.center.toFixed(z.center%1 ? 1 : 0), pad.left-4, y+3.5);
+    // Right label
+    ctx.textAlign='left'; ctx.fillStyle = hexToRgba(color, 0.85);
+    ctx.fillText(z.label, pad.left+chartW+5, y+3.5);
+  });
+
+  // Axis tick prices (faint, non-label)
+  for (let pr=Math.ceil(PRICE_MIN/20)*20; pr<=PRICE_MAX; pr+=20) {
+    ctx.fillStyle='rgba(144,152,176,0.25)'; ctx.font='9px -apple-system,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(pr, pad.left-28, p(pr)+3);
+  }
+
+  // ── 4. Setup zone labels on right edge ────────────────────────────────────
+  SZONES.forEach(z => {
+    if (z.hi < PRICE_MIN || z.lo > PRICE_MAX) return;
+    const midY = (p(z.hi) + p(z.lo)) / 2;
+    ctx.fillStyle = z.dir==='long' ? 'rgba(52,211,153,0.5)' : 'rgba(248,113,113,0.5)';
+    ctx.font='bold 9px -apple-system,sans-serif'; ctx.textAlign='left';
+    ctx.fillText((z.dir==='long'?'▲':'▼')+' '+z.type.replace('_',' '), pad.left+chartW+3, midY+3);
+  });
+
+  // ── 5. Current price ──────────────────────────────────────────────────────
+  const cy = p(CURRENT);
+  ctx.save();
+  ctx.strokeStyle='#fbbf24'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(pad.left,cy); ctx.lineTo(pad.left+chartW,cy); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle='#fbbf24';
+  ctx.fillRect(pad.left-52, cy-9, 48, 18);
+  ctx.fillStyle='#0f1117'; ctx.font='bold 11px -apple-system,sans-serif'; ctx.textAlign='center';
+  ctx.fillText(CURRENT.toFixed(2), pad.left-28, cy+4);
+}
+
+function hexToRgba(hex, alpha) {
+  if (hex.startsWith('rgba')) return hex;
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+window.addEventListener('resize', resize);
+requestAnimationFrame(resize);
+</script>
+</body>
+</html>
